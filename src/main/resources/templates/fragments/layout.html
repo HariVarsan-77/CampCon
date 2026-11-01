@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' | Campus Connect'">Campus Connect</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Main CSS -->
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <!-- Sidebar Fragment -->
+    <aside th:fragment="sidebar(activeNav)" class="sidebar">
+        <div class="sidebar-header">
+            <div class="brand-logo">CC</div>
+            <div class="brand-text">
+                <h2>Campus Connect</h2>
+                <span th:if="${currentUser != null}" th:text="${currentUser.role.displayName}">PORTAL</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <!-- Student Navigation -->
+            <th:block th:if="${currentUser != null and currentUser.student}">
+                <div class="nav-section-title">Student Portal</div>
+                <a th:href="@{/student/dashboard}" class="nav-link" th:classappend="${activeNav == 'dashboard'} ? 'active'">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a th:href="@{/student/complaints/new}" class="nav-link" th:classappend="${activeNav == 'file-complaint'} ? 'active'">
+                    <i data-lucide="plus-circle"></i>
+                    <span>File a Complaint</span>
+                </a>
+                <a th:href="@{/student/complaints}" class="nav-link" th:classappend="${activeNav == 'my-complaints'} ? 'active'">
+                    <i data-lucide="inbox"></i>
+                    <span>My Complaints</span>
+                </a>
+            </th:block>
+
+            <!-- Management Navigation -->
+            <th:block th:if="${currentUser != null and currentUser.management}">
+                <div class="nav-section-title">Administration</div>
+                <a th:href="@{/management/dashboard}" class="nav-link" th:classappend="${activeNav == 'dashboard'} ? 'active'">
+                    <i data-lucide="layout-grid"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a th:href="@{/management/complaints}" class="nav-link" th:classappend="${activeNav == 'all-complaints'} ? 'active'">
+                    <i data-lucide="folder-kanban"></i>
+                    <span>All Complaints</span>
+                </a>
+            </th:block>
+
+            <div class="nav-section-title">Account & Info</div>
+            <a th:href="@{/home}" class="nav-link" th:classappend="${activeNav == 'home'} ? 'active'">
+                <i data-lucide="globe"></i>
+                <span>About Platform</span>
+            </a>
+            <a th:href="@{/notifications}" class="nav-link" th:classappend="${activeNav == 'notifications'} ? 'active'">
+                <i data-lucide="bell"></i>
+                <span>Notifications</span>
+                <span th:if="${unreadNotifications != null and unreadNotifications > 0}"
+                      th:text="${unreadNotifications}" class="sidebar-badge"></span>
+            </a>
+            <a th:href="@{/profile}" class="nav-link" th:classappend="${activeNav == 'profile'} ? 'active'">
+                <i data-lucide="user-cog"></i>
+                <span>Profile & Settings</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer" th:if="${currentUser != null}">
+            <div class="user-snippet">
+                <div class="user-avatar" th:text="${#strings.substring(currentUser.fullName, 0, 1)}">U</div>
+                <div class="user-meta">
+                    <div class="name" th:text="${currentUser.fullName}">User Name</div>
+                    <div class="role" th:text="${currentUser.identifier != null and !currentUser.identifier.empty} ? ${currentUser.identifier} : ${currentUser.role.displayName}">Role</div>
+                </div>
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="icon-btn" title="Sign Out">
+                        <i data-lucide="log-out"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Top Header Fragment -->
+    <header th:fragment="topHeader(pageTitle)" class="top-header">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <button class="icon-btn" id="mobileMenuToggle" style="display: none;">
+                <i data-lucide="menu"></i>
+            </button>
+            <h3 style="font-size: 1.15rem; font-weight: 600;" th:text="${pageTitle}">Dashboard</h3>
+        </div>
+
+        <div class="header-actions">
+            <!-- New Complaint quick CTA for student -->
+            <a th:if="${currentUser != null and currentUser.student}" th:href="@{/student/complaints/new}" class="btn btn-primary btn-sm">
+                <i data-lucide="plus"></i>
+                <span>File Complaint</span>
+            </a>
+
+            <!-- Notifications Icon -->
+            <a th:href="@{/notifications}" class="icon-btn" title="Notifications">
+                <i data-lucide="bell"></i>
+                <span th:if="${unreadNotifications != null and unreadNotifications > 0}" class="badge-dot"></span>
+            </a>
+
+            <!-- User Profile Avatar Link -->
+            <a th:href="@{/profile}" class="user-avatar" th:text="${currentUser != null ? #strings.substring(currentUser.fullName, 0, 1) : 'U'}" title="My Profile"></a>
+        </div>
+    </header>
+
+    <!-- Toast Messages Fragment -->
+    <div th:fragment="toasts" class="toast-container">
+        <div th:if="${successMessage != null}" class="toast toast-success">
+            <i data-lucide="check-circle-2"></i>
+            <div class="toast-content">
+                <div class="toast-title">Success</div>
+                <div class="toast-message" th:text="${successMessage}">Action completed successfully.</div>
+            </div>
+            <button class="toast-close" onclick="this.parentElement.remove()">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+
+        <div th:if="${errorMessage != null}" class="toast toast-error">
+            <i data-lucide="alert-triangle"></i>
+            <div class="toast-content">
+                <div class="toast-title">Notice</div>
+                <div class="toast-message" th:text="${errorMessage}">An error occurred.</div>
+            </div>
+            <button class="toast-close" onclick="this.parentElement.remove()">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts Fragment -->
+    <div th:fragment="scripts">
+        <script th:src="@{/js/main.js}"></script>
+    </div>
+</body>
+</html>
+

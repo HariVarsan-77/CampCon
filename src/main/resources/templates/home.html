@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Welcome')}"></head>
+<body>
+
+    <!-- Public Navigation Bar -->
+    <header class="top-header" style="padding: 0 4rem; position: sticky; top: 0; z-index: 100;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div class="brand-logo">CC</div>
+            <div class="brand-text">
+                <h2>Campus Connect</h2>
+                <span class="gold-gradient-text">Grievance Portal</span>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1.25rem;">
+            <th:block th:if="${currentUser == null}">
+                <a th:href="@{/login?role=student}" class="btn btn-outline btn-sm">
+                    <i data-lucide="graduation-cap"></i>
+                    <span>Student Login</span>
+                </a>
+                <a th:href="@{/login?role=management}" class="btn btn-secondary btn-sm">
+                    <i data-lucide="shield-check"></i>
+                    <span>Management Login</span>
+                </a>
+                <a th:href="@{/signup}" class="btn btn-primary btn-sm">
+                    <i data-lucide="user-plus"></i>
+                    <span>Create Account</span>
+                </a>
+            </th:block>
+
+            <th:block th:if="${currentUser != null}">
+                <a th:if="${isStudent}" th:href="@{/student/dashboard}" class="btn btn-primary btn-sm">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Student Dashboard</span>
+                </a>
+                <a th:if="${isManagement}" th:href="@{/management/dashboard}" class="btn btn-primary btn-sm">
+                    <i data-lucide="layout-grid"></i>
+                    <span>Management Dashboard</span>
+                </a>
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-secondary btn-sm">
+                        <i data-lucide="log-out"></i>
+                        <span>Sign Out</span>
+                    </button>
+                </form>
+            </th:block>
+        </div>
+    </header>
+
+    <div th:replace="~{fragments/layout :: toasts}"></div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-pill">
+            <i data-lucide="sparkles" style="width: 16px; height: 16px;"></i>
+            <span>University Grievance & Facility Management System</span>
+        </div>
+        <h1 class="hero-title">
+            <span class="gold-gradient-text">Campus Connect</span>
+        </h1>
+        <p class="hero-tagline">"Your Voice. Our Campus. A Better Tomorrow."</p>
+        <p class="hero-desc">
+            A centralized digital platform connecting students with university administration.
+            Report classroom, hostel, canteen, and campus facility problems confidentially,
+            and monitor real-time corrective actions taken by management.
+        </p>
+        <div class="hero-actions">
+            <th:block th:if="${currentUser == null}">
+                <a th:href="@{/login?role=student}" class="btn btn-primary btn-lg">
+                    <i data-lucide="alert-circle"></i>
+                    <span>Report an Issue</span>
+                </a>
+                <a th:href="@{/login?role=management}" class="btn btn-outline btn-lg">
+                    <i data-lucide="shield-check"></i>
+                    <span>Management Portal</span>
+                </a>
+            </th:block>
+            <th:block th:if="${currentUser != null}">
+                <a th:if="${isStudent}" th:href="@{/student/complaints/new}" class="btn btn-primary btn-lg">
+                    <i data-lucide="plus-circle"></i>
+                    <span>Report an Issue</span>
+                </a>
+                <a th:if="${isManagement}" th:href="@{/management/complaints}" class="btn btn-primary btn-lg">
+                    <i data-lucide="folder-kanban"></i>
+                    <span>Review Complaints</span>
+                </a>
+            </th:block>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="features-section">
+        <div class="section-header">
+            <h2 class="gold-gradient-text">About Campus Connect</h2>
+            <p>Empowering student voices and modernizing campus administration workflows.</p>
+        </div>
+        <div class="card" style="padding: 2.5rem; line-height: 1.8; font-size: 1.02rem; color: var(--text-muted); border-color: var(--border-color);">
+            <p style="margin-bottom: 1.25rem;">
+                Campus Connect was designed to replace paper-based complaint registers, informal email threads, and delayed verbal complaints with a transparent, responsive, and accountable digital pipeline.
+            </p>
+            <p>
+                Whether it is a broken projector interrupting lectures, hostel water heating failures, unsanitary dining conditions, or safety lighting issues on campus pathways—students can file detailed reports with photo evidence, receive official management replies, and track remediation progress step-by-step.
+            </p>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="steps-section">
+        <div class="section-header">
+            <h2 class="gold-gradient-text">How It Works</h2>
+            <p>A streamlined three-step workflow from problem identification to verified resolution.</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h3>1. Report</h3>
+                <p>Students select an issue category, describe the problem, specify campus location, and attach photo evidence.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h3>2. Review</h3>
+                <p>College administrators and estate officers evaluate the submission, inspect priorities, and schedule campus staff.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h3>3. Resolve</h3>
+                <p>Management communicates official updates, rectifies the grievance, and marks the complaint verified and resolved.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Role Explanation Section -->
+    <section class="roles-section">
+        <div class="section-header">
+            <h2 class="gold-gradient-text">Role Privileges & Capabilities</h2>
+            <p>Distinct portals engineered specifically for students and administrative officers.</p>
+        </div>
+        <div class="roles-grid">
+            <!-- Student Role Card -->
+            <div class="role-card">
+                <div class="role-card-header">
+                    <div class="role-icon">
+                        <i data-lucide="graduation-cap" style="width: 28px; height: 28px;"></i>
+                    </div>
+                    <div>
+                        <h3 style="color: var(--gold-light);">Student</h3>
+                        <span class="text-muted" style="font-size: 0.85rem;">Campus Learners & Residents</span>
+                    </div>
+                </div>
+                <ul class="role-list">
+                    <li><i data-lucide="check"></i> Submit complaints across 10 campus categories</li>
+                    <li><i data-lucide="check"></i> Upload optional photo evidence (JPG, PNG, WEBP)</li>
+                    <li><i data-lucide="check"></i> Track real-time progress via visual status timeline</li>
+                    <li><i data-lucide="check"></i> Read official management responses & explanations</li>
+                    <li><i data-lucide="check"></i> Strict confidentiality: Only view your own complaints</li>
+                </ul>
+                <a th:href="@{/login?role=student}" class="btn btn-outline btn-block">
+                    <span>Enter Student Portal</span>
+                    <i data-lucide="arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Management Role Card -->
+            <div class="role-card">
+                <div class="role-card-header">
+                    <div class="role-icon">
+                        <i data-lucide="shield-check" style="width: 28px; height: 28px;"></i>
+                    </div>
+                    <div>
+                        <h3 style="color: var(--gold-light);">Management</h3>
+                        <span class="text-muted" style="font-size: 0.85rem;">Administration & Estate Officers</span>
+                    </div>
+                </div>
+                <ul class="role-list">
+                    <li><i data-lucide="check"></i> Centralized view of all complaints across campus</li>
+                    <li><i data-lucide="check"></i> Review evidence photographs and student details</li>
+                    <li><i data-lucide="check"></i> Write official replies to the reporting student</li>
+                    <li><i data-lucide="check"></i> Reject irrelevant/duplicate reports with mandatory reason</li>
+                    <li><i data-lucide="check"></i> Add private internal notes visible only to staff</li>
+                </ul>
+                <a th:href="@{/login?role=management}" class="btn btn-primary btn-block">
+                    <span>Enter Management Portal</span>
+                    <i data-lucide="arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="border-top: 1px solid var(--border-subtle); padding: 2.5rem; text-align: center; color: var(--text-dim); font-size: 0.85rem; margin-top: auto;">
+        <p>&copy; 2026 Campus Connect – College Grievance & Complaint Management System.</p>
+        <p style="margin-top: 0.25rem;">Built with Spring Boot & Java.</p>
+    </footer>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
+

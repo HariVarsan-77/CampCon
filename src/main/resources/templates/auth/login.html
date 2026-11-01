@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Sign In')}"></head>
+<body>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <!-- Brand Heading -->
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div class="brand-logo" style="margin: 0 auto 1rem; width: 48px; height: 48px; font-size: 1.5rem;">CC</div>
+                <h1 style="font-size: 1.75rem;">Campus Connect</h1>
+                <p class="text-muted" style="font-size: 0.9rem;" id="currentRoleLabel">
+                    <span th:text="${activeRoleTab == 'management' ? 'Management Staff Portal' : 'Student Grievance Portal'}">Portal</span>
+                </p>
+            </div>
+
+            <!-- Role Selector Tabs -->
+            <div class="auth-tabs">
+                <button type="button" class="auth-tab-btn" id="studentTabBtn"
+                        th:classappend="${activeRoleTab != 'management'} ? 'active'"
+                        onclick="switchLoginTab('student')">
+                    <i data-lucide="graduation-cap" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 4px;"></i>
+                    Student Login
+                </button>
+                <button type="button" class="auth-tab-btn" id="managementTabBtn"
+                        th:classappend="${activeRoleTab == 'management'} ? 'active'"
+                        onclick="switchLoginTab('management')">
+                    <i data-lucide="shield-check" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 4px;"></i>
+                    Management Login
+                </button>
+            </div>
+
+            <div th:replace="~{fragments/layout :: toasts}"></div>
+
+            <!-- Login Form -->
+            <form th:action="@{/login}" method="post">
+                <div class="form-group">
+                    <label class="form-label" for="email">Campus Email</label>
+                    <input type="email" id="email" name="email" class="form-control"
+                           placeholder="e.g. yourname@campus.edu" required autofocus>
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+                        <label class="form-label" for="password" style="margin-bottom: 0;">Password</label>
+                        <a th:href="@{/forgot-password}" style="font-size: 0.78rem;">Forgot password?</a>
+                    </div>
+                    <div class="password-field">
+                        <input type="password" id="password" name="password" class="form-control"
+                               placeholder="Enter your account password" required>
+                        <button type="button" class="password-toggle-btn" title="Toggle password visibility">
+                            <i data-lucide="eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">
+                    <i data-lucide="log-in"></i>
+                    <span>Sign In</span>
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: 1.5rem; font-size: 0.88rem; color: var(--text-muted);">
+                Don't have an account yet?
+                <a th:href="@{/signup}" style="font-weight: 600;">Register here</a>
+            </div>
+
+            <!-- Demo Quick Fill Box -->
+            <div class="demo-account-box">
+                <div style="font-weight: 600; color: var(--gold-light); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.35rem;">
+                    <i data-lucide="key" style="width: 14px; height: 14px;"></i>
+                    <span>Quick Fill Demo Credentials:</span>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                    <button type="button" class="demo-badge" onclick="fillLogin('student@campus.edu', 'password123', 'student')">
+                        🎓 Student: Alex Rivera
+                    </button>
+                    <button type="button" class="demo-badge" onclick="fillLogin('admin@campus.edu', 'password123', 'management')">
+                        🛡️ Admin: Dr. Evelyn Reed
+                    </button>
+                    <button type="button" class="demo-badge" onclick="fillLogin('facilities@campus.edu', 'password123', 'management')">
+                        🔧 Facilities: Marcus Sterling
+                    </button>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <a th:href="@{/home}" class="text-muted" style="font-size: 0.82rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+                    <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i>
+                    <span>Back to Home</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
+

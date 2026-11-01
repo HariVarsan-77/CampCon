@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Profile & Settings')}"></head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <div th:replace="~{fragments/layout :: sidebar('profile')}"></div>
+
+        <div class="main-wrapper">
+            <!-- Top Header -->
+            <div th:replace="~{fragments/layout :: topHeader('User Account Profile')}"></div>
+
+            <div th:replace="~{fragments/layout :: toasts}"></div>
+
+            <main class="content-body" style="max-width: 900px; margin: 0 auto;">
+                <!-- Profile Header Banner -->
+                <div class="card" style="margin-bottom: 2rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+                    <div style="width: 72px; height: 72px; border-radius: var(--radius-full); background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark)); color: #071426; font-size: 2rem; font-weight: 800; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-gold);"
+                         th:text="${#strings.substring(currentUser.fullName, 0, 1)}">U</div>
+                    <div style="flex: 1;">
+                        <h2 th:text="${currentUser.fullName}" style="font-size: 1.6rem;">User Name</h2>
+                        <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.35rem; flex-wrap: wrap;">
+                            <span class="badge" th:classappend="${currentUser.student ? 'status-submitted' : 'status-review'}"
+                                  th:text="${currentUser.role.displayName}">Role</span>
+                            <span class="text-dim">•</span>
+                            <span class="text-muted" th:text="${currentUser.email}">email@campus.edu</span>
+                            <span class="text-dim">•</span>
+                            <span class="text-gold" th:text="${currentUser.identifier}">ID</span>
+                        </div>
+                    </div>
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit" class="btn btn-secondary btn-sm">
+                            <i data-lucide="log-out"></i>
+                            <span>Sign Out</span>
+                        </button>
+                    </form>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <!-- Edit Details Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i data-lucide="user-check" style="color: var(--gold-primary);"></i>
+                                <span>Personal Information</span>
+                            </h3>
+                        </div>
+
+                        <form th:action="@{/profile/update}" th:object="${profileRequest}" method="post">
+                            <div class="form-group">
+                                <label class="form-label" for="fullName">Full Name *</label>
+                                <input type="text" id="fullName" th:field="*{fullName}" class="form-control" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Campus Email</label>
+                                <input type="email" class="form-control" th:value="${currentUser.email}" disabled style="opacity: 0.7;">
+                                <span class="form-text">Primary college email cannot be changed.</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="department">Department</label>
+                                <input type="text" id="department" th:field="*{department}" class="form-control">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="identifier">Roll No / Staff ID</label>
+                                <input type="text" id="identifier" th:field="*{identifier}" class="form-control">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="phone">Contact Phone</label>
+                                <input type="tel" id="phone" th:field="*{phone}" class="form-control" placeholder="+1 (555) 000-0000">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i data-lucide="save"></i>
+                                <span>Save Changes</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Change Password Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i data-lucide="key" style="color: var(--gold-primary);"></i>
+                                <span>Update Password</span>
+                            </h3>
+                        </div>
+
+                        <form th:action="@{/profile/change-password}" th:object="${passwordRequest}" method="post">
+                            <div class="form-group">
+                                <label class="form-label" for="currentPassword">Current Password *</label>
+                                <div class="password-field">
+                                    <input type="password" id="currentPassword" th:field="*{currentPassword}" class="form-control" required>
+                                    <button type="button" class="password-toggle-btn">
+                                        <i data-lucide="eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="newPassword">New Password *</label>
+                                <div class="password-field">
+                                    <input type="password" id="newPassword" th:field="*{newPassword}" class="form-control" placeholder="Min 6 characters" required>
+                                    <button type="button" class="password-toggle-btn">
+                                        <i data-lucide="eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="confirmPassword">Confirm New Password *</label>
+                                <div class="password-field">
+                                    <input type="password" id="confirmPassword" th:field="*{confirmPassword}" class="form-control" required>
+                                    <button type="button" class="password-toggle-btn">
+                                        <i data-lucide="eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-outline btn-block" style="margin-top: 1.5rem;">
+                                <i data-lucide="shield-check"></i>
+                                <span>Update Password</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
+

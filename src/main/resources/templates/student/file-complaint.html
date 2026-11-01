@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('File a Complaint')}"></head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <div th:replace="~{fragments/layout :: sidebar('file-complaint')}"></div>
+
+        <div class="main-wrapper">
+            <!-- Top Header -->
+            <div th:replace="~{fragments/layout :: topHeader('File a Grievance')}"></div>
+
+            <div th:replace="~{fragments/layout :: toasts}"></div>
+
+            <main class="content-body" style="max-width: 900px; margin: 0 auto;">
+                <div class="card" style="border-color: var(--border-color);">
+                    <div class="card-header">
+                        <div>
+                            <h2 style="font-size: 1.45rem;">Submit Campus Grievance</h2>
+                            <p class="text-muted" style="font-size: 0.88rem; margin-top: 0.2rem;">
+                                Please provide accurate details and campus location so estate & management staff can act quickly.
+                            </p>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/student/complaints/new}" th:object="${complaintRequest}" method="post" enctype="multipart/form-data">
+                        <!-- Category and Priority Row -->
+                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem;">
+                            <div class="form-group">
+                                <label class="form-label" for="category">Category *</label>
+                                <select id="category" th:field="*{category}" class="form-select" required>
+                                    <option value="" disabled selected>-- Choose Category --</option>
+                                    <option th:each="c : ${categories}" th:value="${c}" th:text="${c.displayName}"></option>
+                                </select>
+                                <div th:if="${#fields.hasErrors('category')}" class="text-danger" th:errors="*{category}"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="priority">Urgency / Priority *</label>
+                                <select id="priority" th:field="*{priority}" class="form-select" required>
+                                    <option th:each="p : ${priorities}" th:value="${p}" th:text="${p.displayName}"></option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Title -->
+                        <div class="form-group">
+                            <label class="form-label" for="title">Complaint Title / Summary *</label>
+                            <input type="text" id="title" th:field="*{title}" class="form-control"
+                                   placeholder="e.g. Non-functioning ceiling fan and flickering tube light" required>
+                            <span class="form-text">Concise summary of the grievance (between 5 and 150 characters)</span>
+                            <div th:if="${#fields.hasErrors('title')}" class="text-danger" th:errors="*{title}"></div>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="form-group">
+                            <label class="form-label" for="location">Exact Campus Location *</label>
+                            <input type="text" id="location" th:field="*{location}" class="form-control"
+                                   placeholder="e.g. Mechanical Block C, 2nd Floor, Room 204 or South Canteen Table 12" required>
+                            <span class="form-text">Specify block, floor, room number, or landmark to assist maintenance</span>
+                            <div th:if="${#fields.hasErrors('location')}" class="text-danger" th:errors="*{location}"></div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="form-group">
+                            <label class="form-label" for="description">Detailed Description *</label>
+                            <textarea id="description" th:field="*{description}" class="form-control" rows="5"
+                                      placeholder="Explain the issue thoroughly, when you first noticed it, and how it impacts students or classes..." required></textarea>
+                            <div th:if="${#fields.hasErrors('description')}" class="text-danger" th:errors="*{description}"></div>
+                        </div>
+
+                        <!-- Image Upload Abstraction -->
+                        <div class="form-group">
+                            <label class="form-label">Attach Photo Evidence (Optional)</label>
+                            <div class="image-upload-zone" id="dropZone">
+                                <input type="file" id="imageFileInput" name="imageFile" accept=".jpg,.jpeg,.png,.webp">
+                                <div id="uploadPrompt">
+                                    <i data-lucide="image-plus" style="width: 36px; height: 36px; color: var(--gold-primary); margin-bottom: 0.5rem;"></i>
+                                    <div style="font-weight: 600; color: var(--text-main);">Click to browse or drop photo evidence here</div>
+                                    <div class="text-muted" style="font-size: 0.8rem; margin-top: 0.25rem;">
+                                        Supports JPG, JPEG, PNG, WEBP (Max 10MB)
+                                    </div>
+                                </div>
+                                <div id="imagePreviewContainer" style="display: none;" class="preview-container">
+                                    <img id="imagePreviewImg" src="" alt="Selected Preview" class="preview-img">
+                                    <button type="button" id="removeImageBtn" class="preview-remove-btn" title="Remove photo">
+                                        <i data-lucide="x"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <span class="form-text">Photo evidence substantially expedites administrative assessment and repairs.</span>
+                        </div>
+
+                        <!-- Student Information Info Card -->
+                        <div style="background: var(--bg-input); border-radius: var(--radius-md); padding: 1rem; margin: 1.5rem 0; font-size: 0.85rem; border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <span class="text-muted">Submitting as:</span>
+                                <strong th:text="${currentUser.fullName}" style="color: var(--text-main); margin-left: 0.35rem;">Student</strong>
+                                <span class="text-dim"> | </span>
+                                <span th:text="${currentUser.department}" class="text-muted">Department</span>
+                                <span class="text-dim"> | </span>
+                                <span th:text="${currentUser.identifier}" class="text-gold">ID</span>
+                            </div>
+                            <div style="color: var(--status-resolved); display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem;">
+                                <i data-lucide="shield-check" style="width: 15px; height: 15px;"></i>
+                                <span>Confidential Filing</span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                            <a th:href="@{/student/dashboard}" class="btn btn-secondary">
+                                <span>Cancel</span>
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i data-lucide="send"></i>
+                                <span>Submit Complaint</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
+

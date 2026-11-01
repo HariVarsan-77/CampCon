@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Create Account')}"></head>
+<body>
+
+    <div class="auth-wrapper">
+        <div class="auth-card" style="max-width: 540px;">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div class="brand-logo" style="margin: 0 auto 1rem; width: 48px; height: 48px; font-size: 1.5rem;">CC</div>
+                <h1 style="font-size: 1.75rem;">Create Your Account</h1>
+                <p class="text-muted" style="font-size: 0.9rem;">Join the Campus Connect grievance platform</p>
+            </div>
+
+            <div th:replace="~{fragments/layout :: toasts}"></div>
+
+            <form th:action="@{/signup}" th:object="${signupRequest}" method="post">
+                <div class="form-group">
+                    <label class="form-label" for="role">Select Your Role</label>
+                    <select id="role" th:field="*{role}" class="form-select">
+                        <option th:each="r : ${roles}" th:value="${r}" th:text="${r.displayName}"></option>
+                    </select>
+                    <div th:if="${#fields.hasErrors('role')}" class="text-danger" th:errors="*{role}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="fullName">Full Name</label>
+                    <input type="text" id="fullName" th:field="*{fullName}" class="form-control"
+                           placeholder="e.g. John Doe" required>
+                    <div th:if="${#fields.hasErrors('fullName')}" class="text-danger" th:errors="*{fullName}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">College Email Address</label>
+                    <input type="email" id="email" th:field="*{email}" class="form-control"
+                           placeholder="e.g. john.doe@campus.edu" required>
+                    <div th:if="${#fields.hasErrors('email')}" class="text-danger" th:errors="*{email}"></div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="department">Department</label>
+                        <input type="text" id="department" th:field="*{department}" class="form-control"
+                               placeholder="e.g. Computer Science">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="identifier">ID / Roll Number</label>
+                        <input type="text" id="identifier" th:field="*{identifier}" class="form-control"
+                               placeholder="e.g. CS2024-099">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="password-field">
+                        <input type="password" id="password" th:field="*{password}" class="form-control"
+                               placeholder="Minimum 6 characters" required>
+                        <button type="button" class="password-toggle-btn">
+                            <i data-lucide="eye"></i>
+                        </button>
+                    </div>
+                    <div th:if="${#fields.hasErrors('password')}" class="text-danger" th:errors="*{password}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="confirmPassword">Confirm Password</label>
+                    <div class="password-field">
+                        <input type="password" id="confirmPassword" th:field="*{confirmPassword}" class="form-control"
+                               placeholder="Re-enter password" required>
+                        <button type="button" class="password-toggle-btn">
+                            <i data-lucide="eye"></i>
+                        </button>
+                    </div>
+                    <div th:if="${#fields.hasErrors('confirmPassword')}" class="text-danger" th:errors="*{confirmPassword}"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">
+                    <i data-lucide="user-plus"></i>
+                    <span>Register Account</span>
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: 1.5rem; font-size: 0.88rem; color: var(--text-muted);">
+                Already have an account?
+                <a th:href="@{/login}" style="font-weight: 600;">Sign in here</a>
+            </div>
+
+            <div style="text-align: center; margin-top: 1rem;">
+                <a th:href="@{/home}" class="text-muted" style="font-size: 0.82rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+                    <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i>
+                    <span>Back to Home</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
+

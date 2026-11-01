@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Access Denied')}"></head>
+<body>
+
+    <div class="auth-wrapper">
+        <div class="auth-card" style="text-align: center;">
+            <div style="width: 64px; height: 64px; border-radius: var(--radius-full); background: rgba(239, 68, 68, 0.15); color: #ef4444; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                <i data-lucide="shield-alert" style="width: 32px; height: 32px;"></i>
+            </div>
+
+            <h1 style="font-size: 1.75rem; margin-bottom: 0.5rem;">Access Restricted</h1>
+            <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.95rem;">
+                You do not have administrative authority or role permissions to access this page.
+                Role-based boundary enforcement is active.
+            </p>
+
+            <div th:if="${currentUser != null}" style="background: var(--bg-input); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; text-align: left; font-size: 0.85rem;">
+                <div><strong>Current Account:</strong> <span th:text="${currentUser.fullName}">User</span></div>
+                <div><strong>Assigned Role:</strong> <span th:text="${currentUser.role.displayName}" class="text-gold">Student</span></div>
+            </div>
+
+            <div style="display: flex; gap: 0.75rem; justify-content: center;">
+                <th:block th:if="${currentUser != null}">
+                    <a th:if="${currentUser.student}" th:href="@{/student/dashboard}" class="btn btn-primary">
+                        <i data-lucide="layout-dashboard"></i>
+                        <span>Return to Student Dashboard</span>
+                    </a>
+                    <a th:if="${currentUser.management}" th:href="@{/management/dashboard}" class="btn btn-primary">
+                        <i data-lucide="layout-grid"></i>
+                        <span>Return to Management Dashboard</span>
+                    </a>
+                </th:block>
+                <th:block th:if="${currentUser == null}">
+                    <a th:href="@{/login}" class="btn btn-primary">
+                        <i data-lucide="log-in"></i>
+                        <span>Go to Login</span>
+                    </a>
+                </th:block>
+                <a th:href="@{/home}" class="btn btn-secondary">
+                    <i data-lucide="home"></i>
+                    <span>Home</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
+

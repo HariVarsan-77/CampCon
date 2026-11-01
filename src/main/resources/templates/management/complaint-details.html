@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Review #' + ${complaint.complaintId})}"></head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <div th:replace="~{fragments/layout :: sidebar('all-complaints')}"></div>
+
+        <div class="main-wrapper">
+            <!-- Top Header -->
+            <div th:replace="~{fragments/layout :: topHeader('Grievance Review & Resolution')}"></div>
+
+            <div th:replace="~{fragments/layout :: toasts}"></div>
+
+            <main class="content-body" style="max-width: 1100px; margin: 0 auto;">
+                <!-- Breadcrumb -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                    <a th:href="@{/management/complaints}" class="text-muted" style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.88rem;">
+                        <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i>
+                        <span>Back to All Complaints</span>
+                    </a>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <span class="badge" th:classappend="${complaint.priority.badgeClass}" th:text="${complaint.priority.displayName}">Priority</span>
+                        <span class="badge" th:classappend="${complaint.status.badgeClass}" th:text="${complaint.status.displayName}">Status</span>
+                    </div>
+                </div>
+
+                <!-- Rejection Banner if already rejected -->
+                <div th:if="${complaint.status.name() == 'REJECTED'}" class="rejection-banner">
+                    <i data-lucide="ban" style="width: 24px; height: 24px;"></i>
+                    <div>
+                        <h4>This Grievance Was Marked as Rejected</h4>
+                        <p><strong>Reason provided to student:</strong> <span th:text="${complaint.rejectionReason}">Reason</span></p>
+                    </div>
+                </div>
+
+                <!-- Two Column Layout: Details + Actions -->
+                <div style="display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 1.75rem; align-items: start;">
+                    <!-- Left Column: Complaint Details & Student Info -->
+                    <div>
+                        <!-- Main Details Card -->
+                        <div class="card" style="margin-bottom: 1.5rem;">
+                            <div class="card-header">
+                                <div>
+                                    <span class="text-gold" style="font-family: monospace; font-size: 0.95rem; font-weight: 700;"
+                                          th:text="${complaint.complaintId}">CC-2026-0001</span>
+                                    <h2 style="font-size: 1.35rem; margin-top: 0.25rem;" th:text="${complaint.title}">Title</h2>
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 1.5rem;">
+                                <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.45rem;">
+                                    Description of Grievance
+                                </h4>
+                                <div style="white-space: pre-line; line-height: 1.7; color: var(--text-main); font-size: 0.95rem;"
+                                     th:text="${complaint.description}">
+                                    Description...
+                                </div>
+                            </div>
+
+                            <!-- Attached Photo Evidence -->
+                            <div th:if="${complaint.imageUrl != null}" style="margin-bottom: 1.5rem;">
+                                <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.6rem;">
+                                    Student Evidence Photograph
+                                </h4>
+                                <div style="background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 0.75rem; display: inline-block;">
+                                    <img th:src="@{${complaint.imageUrl}}" alt="Photo Evidence"
+                                         style="max-width: 100%; max-height: 300px; border-radius: var(--radius-sm); cursor: pointer;"
+                                         onclick="openModal('imageModal')">
+                                    <div style="margin-top: 0.5rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: var(--text-dim);">
+                                        <span th:text="${complaint.imageFileName != null ? complaint.imageFileName : 'Evidence Photograph'}">Photo</span>
+                                        <button type="button" class="btn btn-outline btn-sm" onclick="openModal('imageModal')">
+                                            <i data-lucide="maximize-2"></i>
+                                            <span>Full Size</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Meta Fields -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-subtle); font-size: 0.88rem;">
+                                <div>
+                                    <div class="text-dim" style="font-size: 0.75rem; text-transform: uppercase;">Category</div>
+                                    <div style="font-weight: 600; color: var(--gold-light);" th:text="${complaint.category.displayName}">Category</div>
+                                </div>
+                                <div>
+                                    <div class="text-dim" style="font-size: 0.75rem; text-transform: uppercase;">Location</div>
+                                    <div style="font-weight: 500;" th:text="${complaint.location}">Location</div>
+                                </div>
+                                <div>
+                                    <div class="text-dim" style="font-size: 0.75rem; text-transform: uppercase;">Submitted Date</div>
+                                    <div style="font-weight: 500;" th:text="${complaint.formattedSubmittedAt}">Date</div>
+                                </div>
+                                <div>
+                                    <div class="text-dim" style="font-size: 0.75rem; text-transform: uppercase;">Last Updated</div>
+                                    <div style="font-weight: 500;" th:text="${#temporals.format(complaint.updatedAt, 'MMM dd, yyyy • hh:mm a')}">Date</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Management Communication Thread (Visible to Student) -->
+                        <div class="card" style="margin-bottom: 1.5rem;">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i data-lucide="message-square" style="color: var(--gold-primary);"></i>
+                                    <span>Official Replies (Dispatched to Student)</span>
+                                </h3>
+                                <span class="badge status-submitted" th:text="${complaint.responses.size()} + ' sent'">0</span>
+                            </div>
+
+                            <div th:if="${complaint.responses.empty}" class="empty-state" style="padding: 1.5rem 1rem;">
+                                <p style="font-size: 0.88rem; margin: 0;">No official replies dispatched yet. Use the Reply form on the right to send an update to the student.</p>
+                            </div>
+
+                            <div th:if="${!complaint.responses.empty}" class="chat-bubbles">
+                                <div th:each="r : ${complaint.responses}" class="bubble management-reply">
+                                    <div class="bubble-header">
+                                        <div>
+                                            <span class="bubble-author" th:text="${r.authorName}">Admin</span>
+                                            <span class="bubble-badge" th:text="${r.authorRole}">Role</span>
+                                        </div>
+                                        <div class="bubble-time" th:text="${r.formattedTimestamp}">Date</div>
+                                    </div>
+                                    <div class="bubble-body" th:text="${r.message}">Message</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Internal Staff Notes (Visible ONLY to Management) -->
+                        <div class="card" style="border-color: rgba(168, 85, 247, 0.3);">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i data-lucide="lock" style="color: #c084fc;"></i>
+                                    <span style="color: #e9d5ff;">Internal Staff Notes</span>
+                                </h3>
+                                <span class="badge" style="background: rgba(168, 85, 247, 0.15); color: #c084fc;">Confidential • Staff Only</span>
+                            </div>
+
+                            <div th:if="${complaint.internalNotes.empty}" style="padding: 1rem; color: var(--text-dim); font-size: 0.85rem;">
+                                No internal notes recorded. Use the internal note form to log vendor contacts, budget requisitions, or internal inspection notes.
+                            </div>
+
+                            <div th:if="${!complaint.internalNotes.empty}" class="chat-bubbles">
+                                <div th:each="n : ${complaint.internalNotes}" class="bubble internal-note">
+                                    <div class="bubble-header">
+                                        <div>
+                                            <span style="font-weight: 600; color: #c084fc; font-size: 0.85rem;" th:text="${n.authorName}">Staff</span>
+                                            <span class="bubble-badge internal">Internal Staff</span>
+                                        </div>
+                                        <div class="bubble-time" th:text="${n.formattedTimestamp}">Date</div>
+                                    </div>
+                                    <div class="bubble-body" th:text="${n.note}">Note body</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Student Card & Management Actions -->
+                    <div>
+                        <!-- Student Profile Snapshot Card -->
+                        <div class="card" style="margin-bottom: 1.5rem;">
+                            <div class="card-header">
+                                <h3 class="card-title" style="font-size: 1rem;">
+                                    <i data-lucide="user" style="color: var(--gold-primary);"></i>
+                                    <span>Student Information</span>
+                                </h3>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.88rem;">
+                                <div>
+                                    <div class="text-dim" style="font-size: 0.72rem; text-transform: uppercase;">Full Name</div>
+                                    <div style="font-weight: 600; color: var(--text-main);" th:text="${complaint.studentName}">Student</div>
+                                </div>
+                                <div>
+                                    <div class="text-dim" style="font-size: 0.72rem; text-transform: uppercase;">Roll / Registration Number</div>
+                                    <div style="font-weight: 600; color: var(--gold-light); font-family: monospace;" th:text="${complaint.studentRollNo}">ID</div>
+                                </div>
+                                <div>
+                                    <div class="text-dim" style="font-size: 0.72rem; text-transform: uppercase;">Academic Department</div>
+                                    <div style="color: var(--text-muted);" th:text="${complaint.studentDepartment}">Department</div>
+                                </div>
+                                <div>
+                                    <div class="text-dim" style="font-size: 0.72rem; text-transform: uppercase;">Campus Email</div>
+                                    <a th:href="'mailto:' + ${complaint.studentEmail}" style="color: var(--gold-light);" th:text="${complaint.studentEmail}">email</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action A: Draft a Reply -->
+                        <div class="card" style="margin-bottom: 1.5rem;">
+                            <div class="card-header">
+                                <h3 class="card-title" style="font-size: 1rem;">
+                                    <i data-lucide="send" style="color: var(--gold-primary);"></i>
+                                    <span>Draft Official Reply</span>
+                                </h3>
+                            </div>
+                            <form th:action="@{/management/complaints/{id}/reply(id=${complaint.id})}" th:object="${replyRequest}" method="post">
+                                <div class="form-group">
+                                    <textarea th:field="*{message}" class="form-control" rows="3"
+                                              placeholder="Write an official response to the student regarding actions scheduled or taken..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block btn-sm">
+                                    <i data-lucide="send"></i>
+                                    <span>Send Response to Student</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Action B: Update Status -->
+                        <div class="card" style="margin-bottom: 1.5rem;">
+                            <div class="card-header">
+                                <h3 class="card-title" style="font-size: 1rem;">
+                                    <i data-lucide="sliders" style="color: var(--gold-primary);"></i>
+                                    <span>Update Complaint Status</span>
+                                </h3>
+                            </div>
+                            <form th:action="@{/management/complaints/{id}/status(id=${complaint.id})}" th:object="${statusRequest}" method="post">
+                                <div class="form-group">
+                                    <label class="form-label" style="font-size: 0.8rem;">Change Status To:</label>
+                                    <select th:field="*{status}" class="form-select" required>
+                                        <option value="UNDER_REVIEW" th:selected="${complaint.status.name() == 'UNDER_REVIEW'}">Under Review</option>
+                                        <option value="ACTION_REQUIRED" th:selected="${complaint.status.name() == 'ACTION_REQUIRED'}">Action Required</option>
+                                        <option value="RESOLVED" th:selected="${complaint.status.name() == 'RESOLVED'}">Resolved</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" style="font-size: 0.8rem;">Status Transition Note (Optional):</label>
+                                    <input type="text" th:field="*{comment}" class="form-control" placeholder="e.g. Electrician team scheduled for 3 PM">
+                                </div>
+                                <button type="submit" class="btn btn-outline btn-block btn-sm">
+                                    <i data-lucide="check"></i>
+                                    <span>Update Status</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Action D: Add Internal Note -->
+                        <div class="card" style="margin-bottom: 1.5rem;">
+                            <div class="card-header">
+                                <h3 class="card-title" style="font-size: 1rem;">
+                                    <i data-lucide="lock" style="color: #c084fc;"></i>
+                                    <span>Add Internal Staff Note</span>
+                                </h3>
+                            </div>
+                            <form th:action="@{/management/complaints/{id}/note(id=${complaint.id})}" th:object="${noteRequest}" method="post">
+                                <div class="form-group">
+                                    <textarea th:field="*{note}" class="form-control" rows="2"
+                                              placeholder="Private note for administration staff only..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-secondary btn-block btn-sm">
+                                    <i data-lucide="plus"></i>
+                                    <span>Record Internal Note</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Action C: Reject Complaint -->
+                        <div class="card" style="border-color: rgba(239, 68, 68, 0.3);">
+                            <div class="card-header">
+                                <h3 class="card-title" style="font-size: 1rem; color: #f87171;">
+                                    <i data-lucide="x-circle"></i>
+                                    <span>Reject Irrelevant / Duplicate</span>
+                                </h3>
+                            </div>
+                            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">
+                                If this complaint is out of scope, fraudulent, or duplicate, you can reject it with an explanatory reason.
+                            </p>
+                            <button type="button" class="btn btn-danger btn-block btn-sm" onclick="openModal('rejectModal')">
+                                <i data-lucide="ban"></i>
+                                <span>Reject Complaint...</span>
+                            </button>
+                        </div>
+
+                        <!-- Activity History Timeline -->
+                        <div class="card" style="margin-top: 1.5rem;">
+                            <h4 style="font-size: 0.92rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">
+                                Audit Activity Log
+                            </h4>
+                            <div class="timeline">
+                                <div th:each="act : ${complaint.activities}" class="timeline-item">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-header">
+                                        <div class="timeline-actor" th:text="${act.actorName}">Actor</div>
+                                        <div class="timeline-time" th:text="${act.formattedTimestamp}">Time</div>
+                                    </div>
+                                    <div class="timeline-action" th:text="${act.action}">Action</div>
+                                    <div class="timeline-details" th:if="${act.details != null}" th:text="${act.details}">Details</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Reject Confirmation Modal -->
+    <div id="rejectModal" class="modal-backdrop">
+        <div class="modal-dialog">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="color: #f87171; display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem;">
+                    <i data-lucide="alert-triangle"></i>
+                    <span>Confirm Rejection</span>
+                </h3>
+                <button type="button" class="icon-btn" onclick="closeModal('rejectModal')">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+                Please provide a mandatory, detailed explanation. This reason will be officially transmitted to the student.
+            </p>
+
+            <form th:action="@{/management/complaints/{id}/reject(id=${complaint.id})}" th:object="${rejectionRequest}" method="post">
+                <div class="form-group">
+                    <label class="form-label" for="reason">Mandatory Rejection Reason *</label>
+                    <textarea id="reason" th:field="*{reason}" class="form-control" rows="4"
+                              placeholder="Explain why this grievance cannot be entertained (e.g. duplicate of #CC-2026-1002, out of campus jurisdiction, violation of university housing policy)..." required></textarea>
+                </div>
+
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('rejectModal')">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i data-lucide="ban"></i>
+                        <span>Confirm and Reject</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Image Fullscreen Modal -->
+    <div id="imageModal" class="modal-backdrop" th:if="${complaint.imageUrl != null}">
+        <div class="modal-dialog" style="max-width: 800px; text-align: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="font-size: 1.1rem;">Evidence Photo</h3>
+                <button type="button" class="icon-btn" onclick="closeModal('imageModal')">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <img th:src="@{${complaint.imageUrl}}" alt="Photo Evidence Preview"
+                 style="max-width: 100%; max-height: 70vh; border-radius: var(--radius-md);">
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
+

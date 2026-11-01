@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Student Dashboard')}"></head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <div th:replace="~{fragments/layout :: sidebar('dashboard')}"></div>
+
+        <div class="main-wrapper">
+            <!-- Top Header -->
+            <div th:replace="~{fragments/layout :: topHeader('Student Dashboard')}"></div>
+
+            <div th:replace="~{fragments/layout :: toasts}"></div>
+
+            <main class="content-body">
+                <!-- Welcome Banner -->
+                <div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, var(--bg-card) 0%, rgba(212, 175, 55, 0.08) 100%); border-color: var(--border-color);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem;">
+                        <div>
+                            <span class="gold-gradient-text" style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;">
+                                Grievance Management Portal
+                            </span>
+                            <h1 style="font-size: 1.85rem; margin-top: 0.25rem;">
+                                Welcome, <span th:text="${currentUser.fullName}" class="text-gold">Student</span>
+                            </h1>
+                            <p class="text-muted" style="margin-top: 0.25rem; font-size: 0.95rem;">
+                                Department of <span th:text="${currentUser.department}">Engineering</span> • Roll: <span th:text="${currentUser.identifier}">ID</span>
+                            </p>
+                        </div>
+                        <a th:href="@{/student/complaints/new}" class="btn btn-primary btn-lg">
+                            <i data-lucide="plus-circle"></i>
+                            <span>File a Complaint</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Statistics Metric Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card gold">
+                        <div class="stat-info">
+                            <div class="stat-label">Total Filed</div>
+                            <div class="stat-value" th:text="${stats.total}">0</div>
+                        </div>
+                        <div class="stat-icon">
+                            <i data-lucide="folder" style="width: 26px; height: 26px;"></i>
+                        </div>
+                    </div>
+
+                    <div class="stat-card amber">
+                        <div class="stat-info">
+                            <div class="stat-label">Pending / In Progress</div>
+                            <div class="stat-value" th:text="${stats.pending}">0</div>
+                        </div>
+                        <div class="stat-icon" style="color: var(--status-review);">
+                            <i data-lucide="clock" style="width: 26px; height: 26px;"></i>
+                        </div>
+                    </div>
+
+                    <div class="stat-card green">
+                        <div class="stat-info">
+                            <div class="stat-label">Resolved</div>
+                            <div class="stat-value" th:text="${stats.resolved}">0</div>
+                        </div>
+                        <div class="stat-icon" style="color: var(--status-resolved);">
+                            <i data-lucide="check-circle" style="width: 26px; height: 26px;"></i>
+                        </div>
+                    </div>
+
+                    <div class="stat-card red">
+                        <div class="stat-info">
+                            <div class="stat-label">Rejected</div>
+                            <div class="stat-value" th:text="${stats.rejected}">0</div>
+                        </div>
+                        <div class="stat-icon" style="color: var(--status-rejected);">
+                            <i data-lucide="x-circle" style="width: 26px; height: 26px;"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Complaint Category Selection Grid -->
+                <div style="margin-bottom: 2.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.75rem;">
+                        <div>
+                            <h2>Select Category to Lodge Issue</h2>
+                            <p class="text-muted" style="font-size: 0.9rem;">Choose the relevant campus domain for immediate routing</p>
+                        </div>
+                        <a th:href="@{/student/complaints/new}" class="text-gold" style="font-size: 0.88rem; font-weight: 600;">
+                            Open General Form &rarr;
+                        </a>
+                    </div>
+
+                    <div class="categories-grid">
+                        <a th:each="cat : ${categories}"
+                           th:href="@{/student/complaints/new(category=${cat.name()})}"
+                           class="category-card">
+                            <div class="category-icon">
+                                <i th:data-lucide="${cat.icon}"></i>
+                            </div>
+                            <h3 th:text="${cat.displayName}">Category</h3>
+                            <p th:text="${cat.description}">Description of what this category covers.</p>
+                            <div class="category-action">
+                                <span>Report in this category</span>
+                                <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Recent Complaint Activity Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i data-lucide="history" style="color: var(--gold-primary);"></i>
+                            <span>Recent Complaint Activity</span>
+                        </h3>
+                        <a th:href="@{/student/complaints}" class="btn btn-outline btn-sm">
+                            <span>View All My Complaints</span>
+                            <i data-lucide="arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <div th:if="${recentComplaints.empty}" class="empty-state">
+                        <div class="empty-icon">
+                            <i data-lucide="file-text"></i>
+                        </div>
+                        <h3>No Complaints Filed Yet</h3>
+                        <p>Have an issue with campus facilities or services? Submit your first grievance in just a couple minutes.</p>
+                        <a th:href="@{/student/complaints/new}" class="btn btn-primary btn-sm">
+                            <i data-lucide="plus"></i>
+                            <span>Lodge Your First Complaint</span>
+                        </a>
+                    </div>
+
+                    <div th:if="${!recentComplaints.empty}" class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Category</th>
+                                    <th>Title</th>
+                                    <th>Priority</th>
+                                    <th>Submitted On</th>
+                                    <th>Current Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="comp : ${recentComplaints}">
+                                    <td>
+                                        <a th:href="@{/student/complaints/{id}(id=${comp.id})}"
+                                           class="text-gold" style="font-weight: 600; font-family: monospace;"
+                                           th:text="${comp.complaintId}">CC-2026-0001</a>
+                                    </td>
+                                    <td>
+                                        <span th:text="${comp.category.displayName}" style="color: var(--text-muted); font-size: 0.85rem;">Category</span>
+                                    </td>
+                                    <td>
+                                        <span th:text="${comp.title}" style="font-weight: 500;">Title</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge" th:classappend="${comp.priority.badgeClass}" th:text="${comp.priority.displayName}">Priority</span>
+                                    </td>
+                                    <td>
+                                        <span th:text="${comp.formattedDateOnly}" style="color: var(--text-dim); font-size: 0.82rem;">Date</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge" th:classappend="${comp.status.badgeClass}" th:text="${comp.status.displayName}">Status</span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/student/complaints/{id}(id=${comp.id})}" class="btn btn-secondary btn-sm">
+                                            <span>Details</span>
+                                            <i data-lucide="chevron-right"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
+

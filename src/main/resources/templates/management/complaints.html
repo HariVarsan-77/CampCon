@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Manage All Complaints')}"></head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <div th:replace="~{fragments/layout :: sidebar('all-complaints')}"></div>
+
+        <div class="main-wrapper">
+            <!-- Top Header -->
+            <div th:replace="~{fragments/layout :: topHeader('Campus Complaints Repository')}"></div>
+
+            <div th:replace="~{fragments/layout :: toasts}"></div>
+
+            <main class="content-body">
+                <!-- Page Top Bar -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h2>All Campus Grievance Reports</h2>
+                        <p class="text-muted" style="font-size: 0.9rem;">
+                            Unified repository shared across administration officers and maintenance divisions.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Search and Filters Bar -->
+                <div class="card" style="margin-bottom: 1.5rem; padding: 1.25rem;">
+                    <form th:action="@{/management/complaints}" method="get" style="display: grid; grid-template-columns: 2fr 1.2fr 1.2fr 1fr auto; gap: 0.85rem; align-items: center;">
+                        <div>
+                            <input type="text" name="search" th:value="${searchQuery}" class="form-control"
+                                   placeholder="Search by ID, student name, location, keyword...">
+                        </div>
+
+                        <div>
+                            <select name="category" class="form-select">
+                                <option value="">All Categories</option>
+                                <option th:each="c : ${categories}" th:value="${c.name()}"
+                                        th:text="${c.displayName}"
+                                        th:selected="${c.name() == selectedCategory}"></option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <select name="status" class="form-select">
+                                <option value="">All Statuses</option>
+                                <option th:each="s : ${statuses}" th:value="${s.name()}"
+                                        th:text="${s.displayName}"
+                                        th:selected="${s.name() == selectedStatus}"></option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <select name="sort" class="form-select">
+                                <option value="newest" th:selected="${selectedSort == 'newest'}">Newest First</option>
+                                <option value="oldest" th:selected="${selectedSort == 'oldest'}">Oldest First</option>
+                                <option value="priority" th:selected="${selectedSort == 'priority'}">Priority Order</option>
+                            </select>
+                        </div>
+
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i data-lucide="filter"></i>
+                                <span>Apply</span>
+                            </button>
+                            <a th:href="@{/management/complaints}" class="btn btn-secondary btn-sm" title="Clear Filters">
+                                <i data-lucide="rotate-ccw"></i>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Complaints Table -->
+                <div class="card">
+                    <div th:if="${complaints.empty}" class="empty-state">
+                        <div class="empty-icon">
+                            <i data-lucide="folder-search"></i>
+                        </div>
+                        <h3>No Complaints Match Your Criteria</h3>
+                        <p>Try broadening your search keyword or clearing the status/category filters.</p>
+                        <a th:href="@{/management/complaints}" class="btn btn-outline btn-sm">
+                            <i data-lucide="refresh-cw"></i>
+                            <span>View All Complaints</span>
+                        </a>
+                    </div>
+
+                    <div th:if="${!complaints.empty}" class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Student Details</th>
+                                    <th>Title & Summary</th>
+                                    <th>Category</th>
+                                    <th>Location</th>
+                                    <th>Priority</th>
+                                    <th>Status</th>
+                                    <th>Evidence</th>
+                                    <th>Submitted</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="c : ${complaints}">
+                                    <td>
+                                        <a th:href="@{/management/complaints/{id}(id=${c.id})}"
+                                           class="text-gold" style="font-weight: 700; font-family: monospace;"
+                                           th:text="${c.complaintId}">CC-2026-0001</a>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 600;" th:text="${c.studentName}">Student</div>
+                                        <div class="text-dim" style="font-size: 0.75rem;">
+                                            <span th:text="${c.studentDepartment}">Dept</span> • <span th:text="${c.studentRollNo}">Roll</span>
+                                        </div>
+                                    </td>
+                                    <td style="max-width: 250px;">
+                                        <div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                             th:text="${c.title}">Title</div>
+                                        <div class="text-muted" style="font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                             th:text="${c.description}">Snippet...</div>
+                                    </td>
+                                    <td>
+                                        <span th:text="${c.category.displayName}" style="color: var(--text-muted); font-size: 0.82rem;">Category</span>
+                                    </td>
+                                    <td>
+                                        <span th:text="${c.location}" style="color: var(--text-muted); font-size: 0.82rem;">Location</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge" th:classappend="${c.priority.badgeClass}" th:text="${c.priority.displayName}">Priority</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge" th:classappend="${c.status.badgeClass}" th:text="${c.status.displayName}">Status</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${c.imageUrl != null}" style="color: var(--gold-light); font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+                                            <i data-lucide="image" style="width: 14px; height: 14px;"></i>
+                                            <span>Yes</span>
+                                        </span>
+                                        <span th:if="${c.imageUrl == null}" class="text-dim" style="font-size: 0.8rem;">None</span>
+                                    </td>
+                                    <td>
+                                        <span th:text="${c.formattedDateOnly}" style="color: var(--text-dim); font-size: 0.8rem;">Date</span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/management/complaints/{id}(id=${c.id})}" class="btn btn-primary btn-sm">
+                                            <span>Take Action</span>
+                                            <i data-lucide="chevron-right"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
+
